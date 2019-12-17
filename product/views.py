@@ -9,8 +9,10 @@ from allauth.account.decorators import verified_email_required
 
 from .forms import ProductUpdateForm
 from product.models import Product, Order
+from .serializers import ProductSerializer, OrderSerializer
 
 import json
+from rest_framework import viewsets
 
 
 class ProductDetail(DetailView):
@@ -126,3 +128,12 @@ class PurchasedHistory(ListView):
         return self.model.objects.filter(user=self.request.user)
 
 product_order = PurchasedHistory.as_view()
+
+
+
+class ProductView(viewsets.ModelViewSet):
+    Queryset = Product.objects.all()
+    def get_queryset(self):
+        user = self.request.user
+        return Product.objects.all()
+    serializer_class = ProductSerializer
