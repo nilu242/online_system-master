@@ -4,9 +4,7 @@ from django.http import HttpRequest
 from django.core.mail import send_mail
 from django.middleware.csrf import get_token
 
-
 from allauth.account.views import PasswordResetView
-
 
 from .models import User
 

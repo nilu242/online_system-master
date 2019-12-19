@@ -5,7 +5,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.base_user import AbstractBaseUser
 
-
 from .managers import UserManager
 
 

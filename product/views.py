@@ -1,16 +1,16 @@
-from django.urls import reverse
+import json
+
 from django.conf import settings
-from django.shortcuts import render, HttpResponse
 from django.http import JsonResponse
+from django.urls import reverse, reverse_lazy
+from django.shortcuts import render, HttpResponse
 from django.utils.decorators import method_decorator
-from django.views.generic import CreateView, ListView, DetailView, View, UpdateView
+from django.views.generic import CreateView, ListView, DetailView, DeleteView, UpdateView
 
 from allauth.account.decorators import verified_email_required
 
 from .forms import ProductUpdateForm
 from product.models import Product, Order
-
-import json
 
 
 class ProductDetail(DetailView):
@@ -27,28 +27,24 @@ class ProductsList(ListView):
     product view list class
     '''
     model = Product
-    success_url = '/charge'
+    success_url = reverse_lazy('purchased')
 
     @method_decorator(verified_email_required)
     def dispatch(self, *args, **kwargs):
         return super(ProductsList, self).dispatch(*args, **kwargs)
 
     def get_context_data(self, **kwargs):
-
         context = super(ProductsList, self).get_context_data(**kwargs)
         if self.request.user.role == 'admin':
-            list_of_product = Product.objects.filter(user=self.request.user)
+            list_of_product = self.model.objects.filter(user=self.request.user)
             context['list_of_product'] = list_of_product
-
         else:
-            list_of_product = Product.objects.all()
+            list_of_product = self.model.objects.all()
             context['list_of_product'] = list_of_product
             context['key'] = settings.STRIPE_PUBLISHABLE_KEY
-
         return context
 
 product_list = ProductsList.as_view()
-
 
 class ProductCreate(CreateView):
     '''
@@ -56,7 +52,7 @@ class ProductCreate(CreateView):
     '''
     model = Product
     fields = ['product_name', 'description', 'price', 'image']
-    success_url = '/'
+    success_url = reverse_lazy('home')
 
     @method_decorator(verified_email_required)
     def dispatch(self, *args, **kwargs):
@@ -69,11 +65,9 @@ class ProductCreate(CreateView):
         obj.save()
         return super(ProductCreate, self).form_valid(form)
 
-
 product_create = ProductCreate.as_view()
 
-
-class ProductDelete(View):
+class ProductDelete(DeleteView):
     """
     product delete class
     """
@@ -92,13 +86,12 @@ class UpdateProduct(UpdateView):
     """
     Updating product through AJAX
     """
-
     model = Product
-    fields = ['product_name', 'description', 'price', 'image']
+    fields = ['product_name', 'description', 'price']
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        form = str(self.get_form())
+        form =str(self.get_form())
         return JsonResponse({'form': form})
 
     def form_valid(self, form):
@@ -116,7 +109,6 @@ def purchased_view(request, pk):
     order.price = order.product.price
     order.save()
     return render(request, 'product/charge.html')
-
 
 class PurchasedHistory(ListView):
     model = Order
