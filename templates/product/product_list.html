@@ -54,6 +54,9 @@
       </div>
       <form id="updateProduct" method="post" >
           {% csrf_token %}
+          <div id="pro">
+
+          </div>
           <input type="hidden" name="id" value="">
           <div id="updateProductContainer">
 
@@ -89,7 +92,6 @@
       </script>
 
       <script type="text/javascript">
-
         $("form#updateProduct").submit(function() {
           var csrfInput = $('input[name="csrfmiddlewaretoken"]').val();
           var idInput = $('input[name="id"]').val().trim();
@@ -130,9 +132,9 @@
       $.ajax({
         method: "get",
         url: 'update/'+id,
-        success: function(data) {
-          htm = $.parseHTML(data.form);
-          $('#updateProductContainer').html(htm)
+        success: function(form) {
+          $('#pro').html(form)
+
         }
       })
     }

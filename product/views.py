@@ -1,15 +1,12 @@
-import json
-
 from django.conf import settings
 from django.http import JsonResponse
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.shortcuts import render, HttpResponse
 from django.utils.decorators import method_decorator
 from django.views.generic import CreateView, ListView, DetailView, DeleteView, UpdateView
 
 from allauth.account.decorators import verified_email_required
 
-from .forms import ProductUpdateForm
 from product.models import Product, Order
 
 
@@ -91,8 +88,8 @@ class UpdateProduct(UpdateView):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        form =str(self.get_form())
-        return JsonResponse({'form': form})
+        form = self.get_form()
+        return HttpResponse(form)
 
     def form_valid(self, form):
         """If the form is valid, save the associated model."""
@@ -111,8 +108,8 @@ def purchased_view(request, pk):
     return render(request, 'product/charge.html')
 
 class PurchasedHistory(ListView):
-    model = Order
     context_object_name = 'buyed_products'
+    model = Order
 
     def get_queryset(self):
         return self.model.objects.filter(user=self.request.user)
